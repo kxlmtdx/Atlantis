@@ -1,13 +1,16 @@
 import discord
 from discord.ext import commands
-import sqlite3
+import sqlite3, time
 
 
 conn = sqlite3.connect('sqlitedb\data.db')
 c = conn.cursor()
 
-c.execute('''CREATE TABLE IF NOT EXISTS command_usage
-             (user_id INTEGER PRIMARY KEY, command_name TEXT, usage_count INTEGER)''')
+c.execute('''CREATE TABLE IF NOT EXISTS message_data
+             (user_id INTEGER PRIMARY KEY, total_messages INTEGER)''')
+
+c.execute('''CREATE TABLE IF NOT EXISTS voicechat_data
+             (user_id INTEGER PRIMARY KEY, total_vctime INTEGER)''')
 conn.commit()
 
 '''
@@ -21,6 +24,9 @@ conn.commit()
 
 #c.execute("alter table command_usage add column 'description' 'float'")
 #conn.commit()
+
+class VoiceTracker:
+    voice_session_times = {}
 
 class init(commands.Cog):
     def __init__(self, bot):
@@ -42,19 +48,37 @@ class init(commands.Cog):
             return
         else:
             user_id = message.author.id
-            c.execute("SELECT * FROM command_usage WHERE user_id=? AND command_name=?", (user_id, 'test1'))
+            c.execute("SELECT * FROM message_data WHERE user_id=?", (user_id,))
             result = c.fetchone()
 
             if result is None:
-                c.execute("INSERT INTO command_usage(user_id, command_name, usage_count) VALUES (?, ?, ?)", (user_id, 'test1', 1))
+                c.execute("INSERT INTO message_data(user_id, total_messages) VALUES (?, ?)", (user_id, 1))
                 conn.commit()
             else:
-                c.execute("UPDATE command_usage SET usage_count=usage_count+1 WHERE user_id=? AND command_name=?", (user_id, 'test1'))
+                c.execute("UPDATE message_data SET total_messages=total_messages+1 WHERE user_id=?", (user_id,))
                 conn.commit()
 
-    @commands.hybrid_command()
-    async def test1(self, ctx):
-        await ctx.send(f'Pong! {round(self.bot.latency * 1000)}ms')
+    @commands.Cog.listener()
+    async def on_voice_state_update(self, member, before, after):
+        if before.channel is None and after.channel is not None:
+            #print(f'Подкл. {member.id}')
+            VoiceTracker.voice_session_times[member.id] = time.time()
+        elif before.channel is not None and after.channel is None:
+            #print(f'Откл. {member.id}')
+            user_id = member.id
+            if user_id in VoiceTracker.voice_session_times:
+                session_time = time.time() - VoiceTracker.voice_session_times[user_id]
+                del VoiceTracker.voice_session_times[user_id]
+                try:
+                    c.execute("SELECT * FROM voicechat_data WHERE user_id=?", (user_id,))
+                    result = c.fetchone()
+                    if result is None:
+                        c.execute("INSERT INTO voicechat_data(user_id, total_vctime) VALUES (?, ?)", (user_id, int(session_time)))
+                    else:
+                        c.execute("UPDATE voicechat_data SET total_vctime=total_vctime+? WHERE user_id=?", (int(session_time), user_id))
+                    conn.commit()
+                except sqlite3.Error as e:
+                    print(f"Error writing to database: {e}")
 
 async def setup(bot):
     await bot.add_cog(init(bot))
