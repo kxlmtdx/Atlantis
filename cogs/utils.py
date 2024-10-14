@@ -9,7 +9,7 @@ class utils(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(description = 'Посмотреть свои или нет статки')
+    @commands.hybrid_command(description = 'Посмотреть свои или нет статки', ephemeral = True)
     async def stats(self, ctx, member: discord.Member = None):
         if member == None:
             member = ctx.author
@@ -20,8 +20,8 @@ class utils(commands.Cog):
         total_vociechat = c.fetchall()
         embed=discord.Embed(title=f"", color=0x8294fe)
         embed.set_author(name=member.name, icon_url=member.avatar.url)
-        embed.add_field(name="Сообщений отправлено: ", value=f"{total_messages[0][0]}", inline=True)
-        embed.add_field(name="В голосовом канале просиженно: ", value=f"{round(total_vociechat[0][0] / 60, 1)} мин.", inline=True)
+        embed.add_field(name="Messages sent: ", value=f"{total_messages[0][0]}", inline=True)
+        embed.add_field(name="Sat in the voice channels: ", value=f"{round(total_vociechat[0][0] / 60, 1)} 'min's'.", inline=True)
         await ctx.send(embed=embed)
 
     @commands.Cog.listener()

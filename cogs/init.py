@@ -38,7 +38,7 @@ class init(commands.Cog):
         await self.bot.tree.sync(guild=None)
         print(f'{self.bot.user} Alive!')
         botactivity = discord.Activity(type=discord.ActivityType.watching,
-                                   name="Христос Воскрес")
+                                   name="Hello?")
         await self.bot.change_presence(activity=botactivity, status=discord.Status.online)
     
     @commands.Cog.listener()
@@ -61,10 +61,8 @@ class init(commands.Cog):
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         if before.channel is None and after.channel is not None:
-            #print(f'Подкл. {member.id}')
             VoiceTracker.voice_session_times[member.id] = time.time()
         elif before.channel is not None and after.channel is None:
-            #print(f'Откл. {member.id}')
             user_id = member.id
             if user_id in VoiceTracker.voice_session_times:
                 session_time = time.time() - VoiceTracker.voice_session_times[user_id]
