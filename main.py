@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands
 import asyncio, os, json
-import sqlite3, time
 
 intents = discord.Intents.all()
 intents.members = True

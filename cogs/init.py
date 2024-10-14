@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 import sqlite3, time
+from datetime import datetime
 
 
 conn = sqlite3.connect('sqlitedb\data.db')
@@ -34,12 +35,11 @@ class init(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        bot = commands.Bot
-        await bot.tree.sync()
+        await self.bot.tree.sync(guild=None)
         print(f'{self.bot.user} Alive!')
         botactivity = discord.Activity(type=discord.ActivityType.watching,
                                    name="Христос Воскрес")
-        await bot.change_presence(activity=botactivity, status=discord.Status.online)
+        await self.bot.change_presence(activity=botactivity, status=discord.Status.online)
     
     @commands.Cog.listener()
     async def on_message(self, message):
