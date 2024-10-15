@@ -4,7 +4,7 @@ import asyncio, os, json
 
 intents = discord.Intents.all()
 intents.members = True
-bot = commands.Bot(command_prefix='da', intents=intents, help_command=None)
+bot = commands.Bot(command_prefix='Atlantis', intents=intents, help_command=None)
 
 with open('config.json') as f:
     data = json.load(f)

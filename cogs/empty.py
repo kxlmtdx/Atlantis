@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-class utils(commands.Cog):
+class empty(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -11,5 +11,5 @@ class utils(commands.Cog):
     async def on_ready(self):
         await self.bot.tree.sync(guild=None)
 
-    async def setup(bot):
-        await bot.add_cog(utils(bot))
+async def setup(bot):
+    await bot.add_cog(empty(bot))

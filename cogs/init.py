@@ -8,10 +8,10 @@ conn = sqlite3.connect('sqlitedb\data.db')
 c = conn.cursor()
 
 c.execute('''CREATE TABLE IF NOT EXISTS message_data
-             (user_id INTEGER PRIMARY KEY, total_messages INTEGER)''')
+             (user_id INTEGER, server_id INTEGER, total_messages INTEGER, PRIMARY KEY (user_id, server_id))''')
 
 c.execute('''CREATE TABLE IF NOT EXISTS voicechat_data
-             (user_id INTEGER PRIMARY KEY, total_vctime INTEGER)''')
+             (user_id INTEGER, server_id INTEGER, total_vctime INTEGER, PRIMARY KEY (user_id, server_id))''')
 conn.commit()
 
 '''
@@ -48,14 +48,15 @@ class init(commands.Cog):
             return
         else:
             user_id = message.author.id
-            c.execute("SELECT * FROM message_data WHERE user_id=?", (user_id,))
+            server_id = message.guild.id
+            c.execute("SELECT * FROM message_data WHERE user_id=? AND server_id=?", (user_id, server_id))
             result = c.fetchone()
 
             if result is None:
-                c.execute("INSERT INTO message_data(user_id, total_messages) VALUES (?, ?)", (user_id, 1))
+                c.execute("INSERT INTO message_data(user_id, server_id, total_messages) VALUES (?, ?, 1)", (user_id, server_id))
                 conn.commit()
             else:
-                c.execute("UPDATE message_data SET total_messages=total_messages+1 WHERE user_id=?", (user_id,))
+                c.execute("UPDATE message_data SET total_messages=total_messages+1 WHERE user_id=? AND server_id=?", (user_id, server_id))
                 conn.commit()
 
     @commands.Cog.listener()
@@ -64,16 +65,17 @@ class init(commands.Cog):
             VoiceTracker.voice_session_times[member.id] = time.time()
         elif before.channel is not None and after.channel is None:
             user_id = member.id
+            server_id = member.guild.id
             if user_id in VoiceTracker.voice_session_times:
                 session_time = time.time() - VoiceTracker.voice_session_times[user_id]
                 del VoiceTracker.voice_session_times[user_id]
                 try:
-                    c.execute("SELECT * FROM voicechat_data WHERE user_id=?", (user_id,))
+                    c.execute("SELECT * FROM voicechat_data WHERE user_id=? AND server_id=?", (user_id, server_id))
                     result = c.fetchone()
                     if result is None:
-                        c.execute("INSERT INTO voicechat_data(user_id, total_vctime) VALUES (?, ?)", (user_id, int(session_time)))
+                        c.execute("INSERT INTO voicechat_data(user_id, server_id, total_vctime) VALUES (?, ?, ?)", (user_id, server_id, int(session_time)))
                     else:
-                        c.execute("UPDATE voicechat_data SET total_vctime=total_vctime+? WHERE user_id=?", (int(session_time), user_id))
+                        c.execute("UPDATE voicechat_data SET total_vctime=total_vctime+? WHERE user_id=? AND server_id=?", (int(session_time), user_id, server_id))
                     conn.commit()
                 except sqlite3.Error as e:
                     print(f"Error writing to database: {e}")
