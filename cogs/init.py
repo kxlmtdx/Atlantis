@@ -1,8 +1,6 @@
 import discord
 from discord.ext import commands
 import sqlite3, time
-from datetime import datetime
-
 
 conn = sqlite3.connect('sqlitedb\data.db')
 c = conn.cursor()
@@ -14,17 +12,10 @@ c.execute('''CREATE TABLE IF NOT EXISTS voicechat_data
              (user_id INTEGER, server_id INTEGER, total_vctime INTEGER, PRIMARY KEY (user_id, server_id))''')
 conn.commit()
 
+'''     if you wish add some columns in db without recreate
+c.execute("alter table command_usage add column 'description' 'TEXT'")
+conn.commit()
 '''
-    alter - изменить
-    table - таблицу 
-    linksauthor - название таблицы, которую менять 
-    add - добавить column - колонку
-    'description' - сюда будет подставлено название добавляемой колонки 
-    'float' - тип добавляемой колонки - число с плавающей точкой
-'''
-
-#c.execute("alter table command_usage add column 'description' 'float'")
-#conn.commit()
 
 class VoiceTracker:
     voice_session_times = {}
