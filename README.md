@@ -1,11 +1,7 @@
-
-
 # Atlantis
 
 ![](https://img.shields.io/badge/Python-3.10+-1081c1?logo=python)
 ![License](https://img.shields.io/badge/License-MIT-blue)
-
-
 
 ## About
 
@@ -29,4 +25,10 @@ Configure Your Bot Token:
 
 * Execute the main.py script to start your bot.
 
+## Recommended Extensions
+
+> [SqLite Viewer][SqLite-Viewer], [SqLite][SqLite]
+
 [DiscordPy]: https://github.com/Rapptz/discord.py
+[SqLite-Viewer]: https://marketplace.visualstudio.com/items?itemName=qwtel.sqlite-viewer
+[SqLite]: https://marketplace.visualstudio.com/items?itemName=alexcvzz.vscode-sqlite
